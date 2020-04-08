@@ -10145,7 +10145,8 @@ void task_adc(void){
   404042:	683b      	ldr	r3, [r7, #0]
   404044:	a90a      	add	r1, sp, #40	; 0x28
   404046:	f841 3d04 	str.w	r3, [r1, #-4]!
-			xQueueSend(xQueueADC, &adc, 0);
+			//xQueueSend(xQueueADC, &adc, 0);
+			xQueueSendFromISR(xQueueADC, &adc, 0);
   40404a:	4623      	mov	r3, r4
   40404c:	4622      	mov	r2, r4
   40404e:	4817      	ldr	r0, [pc, #92]	; (4040ac <task_adc+0xfc>)
@@ -10183,7 +10184,7 @@ void task_adc(void){
   4040a4:	004522a0 	.word	0x004522a0
   4040a8:	00404675 	.word	0x00404675
   4040ac:	2040c86c 	.word	0x2040c86c
-  4040b0:	00402939 	.word	0x00402939
+  4040b0:	00402b1d 	.word	0x00402b1d
   4040b4:	00403525 	.word	0x00403525
 
 004040b8 <usart_serial_getchar>:
@@ -10777,7 +10778,7 @@ void task_mxt(void){
   4044aa:	4c0c      	ldr	r4, [pc, #48]	; (4044dc <task_mxt+0x3c>)
       mxt_handler(&device, &touch.x, &touch.y);
   4044ac:	4f0c      	ldr	r7, [pc, #48]	; (4044e0 <task_mxt+0x40>)
-      xQueueSend( xQueueTouch, &touch, 0);           /* send mesage to queue */
+	  xQueueSendFromISR(xQueueTouch, &touch, 0);
   4044ae:	4e0d      	ldr	r6, [pc, #52]	; (4044e4 <task_mxt+0x44>)
   4044b0:	e002      	b.n	4044b8 <task_mxt+0x18>
     vTaskDelay(100);
@@ -10794,7 +10795,7 @@ void task_mxt(void){
   4044c2:	4669      	mov	r1, sp
   4044c4:	a802      	add	r0, sp, #8
   4044c6:	47b8      	blx	r7
-      xQueueSend( xQueueTouch, &touch, 0);           /* send mesage to queue */
+	  xQueueSendFromISR(xQueueTouch, &touch, 0);
   4044c8:	2300      	movs	r3, #0
   4044ca:	461a      	mov	r2, r3
   4044cc:	4669      	mov	r1, sp
@@ -10808,7 +10809,7 @@ void task_mxt(void){
   4044e0:	00404431 	.word	0x00404431
   4044e4:	2040c880 	.word	0x2040c880
   4044e8:	00403525 	.word	0x00403525
-  4044ec:	00402939 	.word	0x00402939
+  4044ec:	00402b1d 	.word	0x00402b1d
 
 004044f0 <main>:
 /************************************************************************/

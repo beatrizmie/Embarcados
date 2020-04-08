@@ -13609,7 +13609,7 @@ OUTPUT(RTOS-LCD-maxTouch.elf elf32-littlearm)
  .debug_str     0x0009d940      0x483 src/ASF/thirdparty/freertos/freertos-8.2.3/Source/timers.o
                               0x90d35 (size before relaxing)
  .debug_str     0x0009ddc3     0x13f7 src/main.o
-                              0x9898d (size before relaxing)
+                              0x98994 (size before relaxing)
 
 .debug_loc      0x00000000     0xdb4b
  .debug_loc     0x00000000      0xa8b src/ASF/sam/drivers/afec/afec.o
@@ -14929,9 +14929,9 @@ xQueueGenericReceive                              src/ASF/thirdparty/freertos/fr
                                                   src/ASF/thirdparty/freertos/freertos-8.2.3/Source/timers.o
 xQueueGenericReset                                src/ASF/thirdparty/freertos/freertos-8.2.3/Source/queue.o
 xQueueGenericSend                                 src/ASF/thirdparty/freertos/freertos-8.2.3/Source/queue.o
-                                                  src/main.o
                                                   src/ASF/thirdparty/freertos/freertos-8.2.3/Source/timers.o
 xQueueGenericSendFromISR                          src/ASF/thirdparty/freertos/freertos-8.2.3/Source/queue.o
+                                                  src/main.o
                                                   src/ASF/thirdparty/freertos/freertos-8.2.3/Source/timers.o
 xQueueGiveFromISR                                 src/ASF/thirdparty/freertos/freertos-8.2.3/Source/queue.o
                                                   src/main.o

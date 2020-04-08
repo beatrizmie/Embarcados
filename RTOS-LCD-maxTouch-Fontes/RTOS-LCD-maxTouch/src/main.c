@@ -276,7 +276,8 @@ void task_mxt(void){
     * message is found in the queue */
     if (mxt_is_message_pending(&device)) {
       mxt_handler(&device, &touch.x, &touch.y);
-      xQueueSend( xQueueTouch, &touch, 0);           /* send mesage to queue */
+      //xQueueSend( xQueueTouch, &touch, 0);           /* send mesage to queue */
+	  xQueueSendFromISR(xQueueTouch, &touch, 0);
     }
     vTaskDelay(100);
   }
@@ -333,7 +334,8 @@ void task_adc(void){
 			printf("%d\n", g_ul_value);
 			
 	  	    adc.value = g_ul_value;
-			xQueueSend(xQueueADC, &adc, 0);
+			//xQueueSend(xQueueADC, &adc, 0);
+			xQueueSendFromISR(xQueueADC, &adc, 0);
 			
 			vTaskDelay(500);
 
