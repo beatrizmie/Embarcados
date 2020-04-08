@@ -276,8 +276,8 @@ void task_mxt(void){
     * message is found in the queue */
     if (mxt_is_message_pending(&device)) {
       mxt_handler(&device, &touch.x, &touch.y);
-      //xQueueSend( xQueueTouch, &touch, 0);           /* send mesage to queue */
-	  xQueueSendFromISR(xQueueTouch, &touch, 0);
+      xQueueSend( xQueueTouch, &touch, 0);           /* send mesage to queue */
+	  //xQueueSendFromISR(xQueueTouch, &touch, 0);
     }
     vTaskDelay(100);
   }
