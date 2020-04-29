@@ -3,7 +3,6 @@
 */
 
 #include <asf.h>
-#include <stdio.h>
 #include <string.h>
 #include "conf_board.h"
 
@@ -47,17 +46,20 @@
 
 #define TASK_LED1_STACK_SIZE  (1024/sizeof(portSTACK_TYPE))
 #define TASK_LED1_STACK_PRIORITY (tskIDLE_PRIORITY)
+
 #define TASK_LED2_STACK_SIZE  (1024/sizeof(portSTACK_TYPE))
 #define TASK_LED2_STACK_PRIORITY (tskIDLE_PRIORITY)
+
 #define TASK_LED3_STACK_SIZE  (1024/sizeof(portSTACK_TYPE))
 #define TASK_LED3_STACK_PRIORITY (tskIDLE_PRIORITY)
+
 #define TASK_MONITOR_STACK_SIZE            (2048/sizeof(portSTACK_TYPE))
 #define TASK_MONITOR_STACK_PRIORITY        (tskIDLE_PRIORITY)
 
-#define TASK_UART_STACK_SIZE  (1024/sizeof(portSTACK_TYPE))
+#define TASK_UART_STACK_SIZE  (4096/sizeof(portSTACK_TYPE))
 #define TASK_UART_STACK_PRIORITY (tskIDLE_PRIORITY)
 
-#define TASK_EXECUTE_STACK_SIZE (1024 / sizeof(portSTACK_TYPE))
+#define TASK_EXECUTE_STACK_SIZE (4096 / sizeof(portSTACK_TYPE))
 #define TASK_EXECUTE_STACK_PRIORITY (tskIDLE_PRIORITY)
 
 
@@ -79,17 +81,16 @@ extern void vApplicationTickHook(void);
 extern void vApplicationMallocFailedHook(void);
 extern void xPortSysTickHandler(void);
 
-void pisca_led(int n, int t);
-
 
 void but1_callback() {
-	xSemaphoreGiveFromISR(xSemaphore1, 4);
+	// xSemaphoreGiveFromISR(xSemaphore1, 4);
+	xQueueSendFromISR(xQueueCommand, "toggle led 1", 0);
 }
 void but2_callback() {
-	xSemaphoreGiveFromISR(xSemaphore2, 4);
+	xQueueSendFromISR(xQueueCommand, "toggle led 2", 0);
 }
 void but3_callback() {
-	xSemaphoreGiveFromISR(xSemaphore3, 4);
+	xQueueSendFromISR(xQueueCommand, "toggle led 3", 0);
 }
 
 void pin_toggle(Pio *pio, uint32_t mask){
@@ -328,8 +329,7 @@ void USART1_Handler(void){
 	//  Dados disponível para leitura
 	if(ret & US_IER_RXRDY){
 		usart_serial_getchar(USART1, &c);
-	    xQueueSend( xQueueChar, &c, 0);           /* send mesage to queue */
-		printf("%c", c);
+	    xQueueSendFromISR( xQueueChar, &c, 0);           /* send mesage to queue */
 
 		// -  Transmissoa finalizada
 		} else if(ret & US_IER_TXRDY){
@@ -347,7 +347,7 @@ uint32_t usart1_puts(uint8_t *pstring){
 
 void task_uartRX(void){
 	
-	xQueueChar = xQueueCreate( 20, sizeof(char[20]) );
+	xQueueChar = xQueueCreate( 20, sizeof(char) );
 	
 	int cont = 0;
 	char c;
@@ -355,13 +355,14 @@ void task_uartRX(void){
 	
 	while (true) {
 		if (xQueueReceive( xQueueChar, &(c), ( TickType_t )  500 / portTICK_PERIOD_MS)) {
-			if(c == "\n") {
-				command[cont] = 0;
+			if(c == '\n') {
+				command[cont] = NULL;
 				cont = 0;
+				printf('\n');
 				xQueueSendFromISR(xQueueCommand, &command, 0);					/* send message to queue */
 			} else {
 				command[cont] = c;
-				printf("%c\n", c);
+				printf("%c", c);
 				cont++;
 			}
 		}
@@ -376,14 +377,12 @@ void task_execute(void) {
 	
 	while(true) {
 		if(xQueueReceive( xQueueCommand, &(command), ( TickType_t )  500 / portTICK_PERIOD_MS)) {		
-			
-			printf("%c\n", command);
-				
-			if(strcmp(command, "toggle led 1")) {
-				xSemaphoreGiveFromISR(xSemaphore1, 4);
+							
+			if(strcmp(command, "toggle led 1") == 0) {
+				xSemaphoreGive(xSemaphore1);
 			}
-			else if(strcmp(command, "toggle led 3")) {
-				xSemaphoreGiveFromISR(xSemaphore3, 4);
+			else if(strcmp(command, "toggle led 3") == 0) {
+				xSemaphoreGive(xSemaphore3);
 			}
 		}
 	}
@@ -440,7 +439,7 @@ TASK_UART_STACK_PRIORITY, NULL) != pdPASS) {
 	printf("Failed to create test uart task\r\n");
 }
 
-if (xTaskCreate(task_execute, "EXECUTE", TASK_EXECUTE_STACK_SIZE, NULL, TASK_EXECUTE_STACK_PRIORITY, NULL) != pdPASS)
+if (xTaskCreate(task_execute, "Execute", TASK_EXECUTE_STACK_SIZE, NULL, TASK_EXECUTE_STACK_PRIORITY, NULL) != pdPASS)
 {
 	printf("Failed to create execute task\r\n");
 }
